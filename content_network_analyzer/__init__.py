@@ -3,7 +3,7 @@ Provides datatypes, and methods for analyzing, and visualizing data collected fr
 """
 
 from .core import NamedCluster
-from .models import SoundCloudTrack, YouTubeTrack
+from .models import SoundCloudTrack, YouTubeTrack, WattPadBook
 from .views import MatPlotLibView
 
 
