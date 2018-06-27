@@ -6,10 +6,10 @@ from datetime import datetime
 from itertools import cycle, product
 from pytz import UTC
 
-import matplotlib
+import matplotlib  # noqa:F401
 from matplotlib.dates import MonthLocator, DateFormatter
-from matplotlib.figure import Figure
-from matplotlib.axes._axes import Axes
+from matplotlib.figure import Figure  # noqa:F401
+from matplotlib.axes._axes import Axes  # noqa:F401
 
 from ..core import Cluster, NamedEntity, View
 
@@ -64,7 +64,7 @@ class MatPlotLibView(View):
         lineformats = cycle(product(LINES, [(r/255., g/255., b/255.) for (r, g, b) in COLORS]))
         latest_values = {}
         for cluster in self._clusters:
-            individuals =  [
+            individuals = [
                 individual for individual in cluster
                 if individual.getDatetime() >= mindate and individual.getDatetime() <= maxdate]
             dates = [individual.getDatetime() for individual in individuals]

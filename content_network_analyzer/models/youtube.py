@@ -18,12 +18,12 @@ LOGGER = getLogger(__name__)
 
 def parse_int(text):
     """Returns the first integer in a string.
-    
+
     Parameters
     ----------
     text : str
         A string.
-    
+
     Returns
     -------
     int

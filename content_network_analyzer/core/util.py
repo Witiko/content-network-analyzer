@@ -8,7 +8,6 @@ from logging import getLogger
 LOGGER = getLogger(__name__)
 
 
-
 def fraction(numerator, denominator, bottom=0.0):
     """Computes a fraction.
 
