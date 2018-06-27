@@ -9,7 +9,7 @@ from weakref import WeakValueDictionary
 from bs4 import BeautifulSoup
 from sortedcontainers import SortedSet
 
-from ..core import SampledIndividual, RandomVariable, NamedEntity
+from ..core import SampledIndividual, RandomVariable, NamedEntity, fraction
 
 
 LOGGER = getLogger(__name__)
@@ -69,7 +69,7 @@ class SoundCloudTrack(RandomVariable, NamedEntity):
             The number of comments the track had at the time of the snapshot.
         likes : int
             The number of likes the track had at the time of the snapshot.
-        likes_plays : float
+        likes / plays : float
             The ratio between the number of likes, and the number of plays in percent if the number
             of plays is non-zero and zero otherwise.
         """
@@ -89,7 +89,7 @@ class SoundCloudTrack(RandomVariable, NamedEntity):
             self.downloads = downloads
             self.comments = comments
             self.likes = likes
-            self.likes_plays = (100.0 * likes / plays) if plays != 0 else 0.0
+            self.__dict__["likes / plays"] = fraction(likes, plays)
 
             if self.track:
                 self.track._add(self)

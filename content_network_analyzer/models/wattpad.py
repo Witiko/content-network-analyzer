@@ -10,7 +10,7 @@ from weakref import WeakValueDictionary
 from bs4 import BeautifulSoup
 from sortedcontainers import SortedSet
 
-from ..core import SampledIndividual, RandomVariable, NamedEntity
+from ..core import SampledIndividual, RandomVariable, NamedEntity, fraction
 
 
 LOGGER = getLogger(__name__)
@@ -86,7 +86,7 @@ class WattPadBook(RandomVariable, NamedEntity):
             The number of reads the book has received at the time of the snapshot.
         votes : int
             The number of votes the book has received at the time of the snapshot.
-        votes_reads : float
+        votes / reads : float
             The ratio between the number of votes, and the number of reads in percent if the number
             of reads is non-zero and zero otherwise.
         """
@@ -102,7 +102,7 @@ class WattPadBook(RandomVariable, NamedEntity):
             self.date = date
             self.reads = reads
             self.votes = votes
-            self.votes_reads = (100.0 * votes / reads) if reads != 0 else 0.0
+            self.__dict__["votes / reads"] = fraction(votes, reads)
 
             if self.book:
                 self.book._add(self)
@@ -266,7 +266,7 @@ class WattPadPage(RandomVariable, NamedEntity):
             The number of votes the page has received at the time of the snapshot.
         comments : int
             The number of comments the page has received at the time of the snapshot.
-        votes_reads : float
+        votes / reads : float
             The ratio between the number of votes, and the number of reads in percent if the number
             of reads is non-zero and zero otherwise.
         """
@@ -286,7 +286,7 @@ class WattPadPage(RandomVariable, NamedEntity):
             self.reads = reads
             self.votes = votes
             self.comments = comments
-            self.votes_reads = (100.0 * votes / reads) if reads != 0 else 0.0
+            self.__dict__["votes / reads"] = fraction(votes, reads)
 
             if self.page:
                 self.page._add(self)

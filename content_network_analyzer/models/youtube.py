@@ -10,7 +10,7 @@ from weakref import WeakValueDictionary
 from bs4 import BeautifulSoup
 from sortedcontainers import SortedSet
 
-from ..core import SampledIndividual, RandomVariable, NamedEntity
+from ..core import SampledIndividual, RandomVariable, NamedEntity, fraction
 
 
 LOGGER = getLogger(__name__)
@@ -82,10 +82,10 @@ class YouTubeTrack(RandomVariable, NamedEntity):
             The number of likes the track had at the time of the snapshot.
         dislikes : int
             The number of dislikes the track had at the time of the snapshot.
-        likes_views : float
+        likes / views : float
             The ratio between the number of likes, and the number of views in percent if the number
             of views is non-zero and zero otherwise.
-        likes_dislikes : float
+        likes / (likes + dislikes) : float
             The ratio between the number of likes, and the number of likes and dislikes in percent
             if the number of likes and dislikes is non-zero and zero otherwise.
         """
@@ -102,10 +102,9 @@ class YouTubeTrack(RandomVariable, NamedEntity):
             self.date = date
             self.views = views
             self.likes = likes
-            self.likes_views = (100.0 * likes / views) if views != 0 else 0.0
+            self.__dict__["likes / views"] = fraction(likes, views)
             self.dislikes = dislikes
-            self.likes_dislikes = (100.0 * likes / (likes + dislikes)) \
-                if (likes + dislikes) != 0 else 0.0
+            self.__dict__["likes / (likes + dislikes)"] = fraction(likes, likes + dislikes)
 
             if self.track:
                 self.track._add(self)
