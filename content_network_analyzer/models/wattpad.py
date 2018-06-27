@@ -61,11 +61,12 @@ class WattPadBook(RandomVariable, NamedEntity):
 
         Parameters
         ----------
-        book : WattPadBook
-            The WattPad book the snapshot belongs to. The snapshot is associated with the book
-            immediately after construction.
-        title : str
-            The title the book had at the time of the snapshot.
+        book : WattPadBook or None
+            The WattPad book the snapshot belongs to. None if the snapshot belongs to a cluster. The
+            snapshot is associated with the book immediately after construction.
+        title : str or None
+            The title the book had at the time of the snapshot. None if the snapshot belongs to a
+            cluster.
         date : datetime
             The date, and time at which the snapshot was taken.
         reads : int
@@ -76,8 +77,7 @@ class WattPadBook(RandomVariable, NamedEntity):
         Attributes
         ----------
         book : WattPadBook or None
-            The WattPad book the snapshot belongs to. None if the snapshot belongs to a
-            cluster.
+            The WattPad book the snapshot belongs to. None if the snapshot belongs to a cluster.
         title : str
             The title the book had at the time of the snapshot.
         date : datetime
@@ -233,11 +233,12 @@ class WattPadPage(RandomVariable, NamedEntity):
 
         Parameters
         ----------
-        page : WattPadPage
-            The WattPad book page the snapshot belongs to. The snapshot is associated with the page
-            immediately after construction.
-        title : str
-            The title the book had at the time of the snapshot.
+        page : WattPadPage or None
+            The WattPad book page the snapshot belongs to. None if the snapshot belongs to a
+            cluster. The snapshot is associated with the page immediately after construction.
+        title : str or None
+            The title the book had at the time of the snapshot. None if the snapshot belongs to a
+            cluster.
         subtitle : str
             The title the page had at the time of the snapshot.
         date : datetime

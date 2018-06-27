@@ -35,11 +35,12 @@ class YouTubeTrack(RandomVariable, NamedEntity):
 
         Parameters
         ----------
-        track : YouTubeTrack
-            The YouTube track the snapshot belongs to. The snapshot is associated with the track
-            immediately after construction.
-        title : str
-            The title the track had at the time of the snapshot.
+        track : YouTubeTrack or None
+            The YouTube track the snapshot belongs to. None if the snapshot belongs to a cluster.
+            The snapshot is associated with the track immediately after construction.
+        title : str or None
+            The title the track had at the time of the snapshot. None if the snapshot belongs to a
+            cluster.
         date : datetime
             The date, and time at which the snapshot was taken.
         views : int
