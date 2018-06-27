@@ -17,7 +17,7 @@ LOGGER = getLogger(__name__)
 
 
 def parse_int(text):
-    """Translates a human-readable string into an integer.
+    """Translates a human-readable string (e.g. "4.1K Reads") into an integer (e.g. 4100).
 
     Parameters
     ----------
@@ -194,6 +194,198 @@ class WattPadBook(RandomVariable, NamedEntity):
 
     def getName(self):
         return self.sample[-1].title if self.sample else "(unknown title)"
+
+    def __repr__(self):
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
+
+    def __hash__(self):
+        return hash(self.url)
+
+    def __getstate__(self):
+        return self.url
+
+    def __setstate__(self, url):
+        self.__init__(url)
+
+    def __getnewargs__(self):
+        return (self.url, )
+
+
+class WattPadPage(RandomVariable, NamedEntity):
+    """This class represents a page in a WattPad book along with its associated snapshots.
+
+    Parameters
+    ----------
+    url : str
+        The URL that uniquely identifies the page in a WattPad book.
+
+    Attributes
+    ----------
+    sample : sortedcontainers.SortedSet of WattPadPage.Snapshot
+        The associated snapshots.
+    """
+    _samples = WeakValueDictionary()
+
+    class Snapshot(SampledIndividual):
+        """This class represents a WattPad book page snapshot.
+
+        Parameters
+        ----------
+        page : WattPadPage
+            The WattPad book page the snapshot belongs to. The snapshot is associated with the page
+            immediately after construction.
+        title : str
+            The title the book had at the time of the snapshot.
+        subtitle : str
+            The title the page had at the time of the snapshot.
+        date : datetime
+            The date, and time at which the snapshot was taken.
+        reads : int
+            The number of reads the page has received at the time of the snapshot.
+        votes : int
+            The number of votes the page has received at the time of the snapshot.
+        comments : int
+            The number of comments the page has received at the time of the snapshot.
+
+        Attributes
+        ----------
+        page : WattPadPage
+            The WattPad book page the snapshot belongs to. The snapshot is associated with the page
+            immediately after construction.
+        title : str
+            The title the book had at the time of the snapshot.
+        subtitle : str
+            The title the page had at the time of the snapshot.
+        date : datetime
+            The date, and time at which the snapshot was taken.
+        reads : int
+            The number of reads the page has received at the time of the snapshot.
+        votes : int
+            The number of votes the page has received at the time of the snapshot.
+        comments : int
+            The number of comments the page has received at the time of the snapshot.
+        votes_reads : float
+            The ratio between the number of votes, and the number of reads in percent if the number
+            of reads is non-zero and zero otherwise.
+        """
+        def __init__(self, page, title, subtitle, date, reads, votes, comments):
+            assert isinstance(page, WattPadPage) or page is None
+            assert isinstance(title, str) or (title is None and page is None)
+            assert isinstance(subtitle, str) or (subtitle is None and page is None)
+            assert isinstance(date, datetime)
+            assert isinstance(reads, int)
+            assert isinstance(votes, int)
+            assert isinstance(comments, int)
+
+            self.page = page
+            self.title = title
+            self.subtitle = subtitle
+            self.date = date
+            self.reads = reads
+            self.votes = votes
+            self.comments = comments
+            self.votes_reads = (100.0 * votes / reads) if reads != 0 else 0.0
+
+            if self.page:
+                self.page._add(self)
+
+        def getDatetime(self):
+            return self.date
+
+        def __lt__(self, other):
+            return isinstance(other, WattPadPage.Snapshot) and self.date < other.date
+
+        def __le__(self, other):
+            return isinstance(other, WattPadPage.Snapshot) and self.date <= other.date
+
+        def __hash__(self):
+            return hash((self.page, self.date))
+
+        def __eq__(self, other):
+            return isinstance(other, WattPadPage.Snapshot) and self.page == other.page \
+                and self.date == other.date
+
+        def __repr__(self):
+            return "%s(%s)" % (self.__class__.__name__, self.__dict__)
+
+        def __add__(self, other):
+            assert isinstance(other, WattPadPage.Snapshot)
+            return WattPadPage.Snapshot(
+                page=None, title=None, subtitle=None, date=self.date,
+                reads=self.reads + other.reads, votes=self.votes + other.votes,
+                comments=self.comments + other.comments)
+
+        def __getstate__(self):
+            return {
+                "page": self.page,
+                "title": self.title,
+                "subtitle": self.subtitle,
+                "date": self.date,
+                "reads": self.reads,
+                "votes": self.votes,
+                "comments": self.comments,
+            }
+
+        def __setstate__(self, state):
+            self.__init__(**state)
+
+        def __getnewargs__(self):
+            return (
+                self.page, self.title, self.subtitle, self.date, self.reads, self.votes,
+                self.comments)
+
+        @staticmethod
+        def from_html(page, date, f):
+            """Constructs a WattPad book page snapshot from an HTML dump.
+
+            Parameters
+            ----------
+            page : WattPadPage or None
+                The WattPad book page the snapshot belongs to.
+            date : datetime
+                The date, and time at which the dump was taken.
+            f : file-like readable object
+                The HTML dump.
+
+            Returns
+            -------
+            WattPadPage.Snapshot
+                The snapshot constructed from the HTML dump.
+            """
+            document = BeautifulSoup(f, "html.parser")
+            title = document.find("h1").text.strip()
+            subtitle = document.find("h2").text.strip()
+            reads = parse_int(document.find("span", {"class": "reads"}).text)
+            votes = parse_int(document.find("span", {"class": "votes"}).text)
+            comments = parse_int(document.find("span", {"class": "comments"}).text)
+            return WattPadPage.Snapshot(page, title, subtitle, date, reads, votes, comments)
+
+    def __init__(self, url):
+        self.url = url
+        if url in WattPadPage._samples:
+            self.sample = WattPadPage._samples[url]
+        else:
+            self.sample = SortedSet()
+            WattPadPage._samples[url] = self.sample
+
+    def _add(self, snapshot):
+        """Associate a snapshot with the page.
+
+        Parameters
+        ----------
+        shapshot : WattPadPage.Snapshot
+            The snapshot that will be associated with the page.
+        """
+        assert isinstance(snapshot, WattPadPage.Snapshot)
+        self.sample.add(snapshot)
+
+    def getName(self):
+        if self.sample:
+            return "%(title)s - %(subtitle)s" % self.sample[-1].__dict__
+        else:
+            return "(unknown title)"
 
     def __repr__(self):
         return "%s(%s)" % (
