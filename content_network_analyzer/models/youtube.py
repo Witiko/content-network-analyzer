@@ -4,32 +4,15 @@ Defines datatypes for YouTube tracks.
 
 from datetime import datetime
 from logging import getLogger
-from re import match, sub
 from weakref import WeakValueDictionary
 
 from bs4 import BeautifulSoup
 from sortedcontainers import SortedSet
 
-from ..core import SampledIndividual, RandomVariable, NamedEntity, fraction
+from ..core import SampledIndividual, RandomVariable, NamedEntity, fraction, parse_int
 
 
 LOGGER = getLogger(__name__)
-
-
-def parse_int(text):
-    """Returns the first integer in a string.
-
-    Parameters
-    ----------
-    text : str
-        A string.
-
-    Returns
-    -------
-    int
-        The first integer in the string.
-    """
-    return int(sub(r"\s*", "", match(r"[^\d]*([\d\s]+)", text).group(1)))
 
 
 class YouTubeTrack(RandomVariable, NamedEntity):

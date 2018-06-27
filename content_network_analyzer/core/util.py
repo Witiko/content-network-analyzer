@@ -3,6 +3,7 @@ Defines utility functions.
 """
 
 from logging import getLogger
+from re import match, sub
 
 
 LOGGER = getLogger(__name__)
@@ -36,3 +37,19 @@ def fraction(numerator, denominator, bottom=0.0):
     assert isinstance(value, float)
 
     return value
+
+
+def parse_int(text):
+    """Returns the first integer in a string.
+
+    Parameters
+    ----------
+    text : str
+        A string.
+
+    Returns
+    -------
+    int
+        The first integer in the string.
+    """
+    return int(sub(r"\s*", "", match(r"[^\d]*([\d\s]+)", text).group(1)))
