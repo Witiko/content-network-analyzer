@@ -24,6 +24,7 @@ COLORS = [
     (140, 86, 75), (196, 156, 148), (227, 119, 194), (247, 182, 210), (127, 127, 127),
     (199, 199, 199), (188, 189, 34), (219, 219, 141), (23, 190, 207), (158, 218, 229),
 ]
+LABEL_MAX_LENGTH = 100
 
 
 class MatPlotLibView(View):
@@ -69,21 +70,27 @@ class MatPlotLibView(View):
                 if individual.getDatetime() >= mindate and individual.getDatetime() <= maxdate]
             dates = [individual.getDatetime() for individual in individuals]
             values = [individual.__dict__[attr] for individual in individuals]
+            if not values:
+                continue
+            cluster_name = cluster.getName()
+            if len(cluster_name) <= LABEL_MAX_LENGTH:
+                label = cluster_name
+            else:
+                label = cluster_name[:LABEL_MAX_LENGTH - 1] + "…"
             linefmt, linecolor = next(lineformats)
             ax.plot_date(
-                dates, values, fmt=linefmt, linewidth=LINEWIDTH, c=linecolor,
-                label=cluster.getName())
-            latest_values[cluster.getName()] = values[-1]
+                dates, values, fmt=linefmt, linewidth=LINEWIDTH, c=linecolor, label=label)
+            latest_values[label] = values[-1]
         sorted_handles = [
             (handle, cluster_name) for handle, cluster_name, _
             in sorted([
-                (handle, track_title, latest_values[track_title])
-                for handle, track_title
+                (handle, label, latest_values[label])
+                for handle, label
                 in zip(*ax.get_legend_handles_labels())
             ], key=lambda x: x[2], reverse=True)]
         ax.legend(
             [handle for handle, _ in sorted_handles],
-            [track_title for _, track_title in sorted_handles],
+            [label for _, label in sorted_handles],
             loc="upper left", bbox_to_anchor=(1, 1))
 
         fig.tight_layout()
