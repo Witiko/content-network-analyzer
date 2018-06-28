@@ -140,7 +140,8 @@ class TumblrPost(RandomVariable, NamedEntity):
             description = document.find("meta", {"name": "description"})["content"]
             tags = document.find("meta", {"name": "keywords"})["content"].split(',')
             title = description if description else ' '.join(tags)
-            notes = parse_int(post_element.find("a", {"class": "post-notes"}).text)
+            notes_element = post_element.find("a", {"class": "post-notes"})
+            notes = parse_int(notes_element.text) if notes_element else 0
             return TumblrPost.Snapshot(post, title, date, tags, notes)
 
     def __init__(self, url):
