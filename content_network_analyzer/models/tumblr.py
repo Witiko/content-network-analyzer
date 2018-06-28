@@ -4,7 +4,6 @@ Defines datatypes for Tumblr posts.
 
 from datetime import datetime
 from logging import getLogger
-from re import sub
 from weakref import WeakValueDictionary
 
 from bs4 import BeautifulSoup
@@ -138,8 +137,9 @@ class TumblrPost(RandomVariable, NamedEntity):
             """
             document = BeautifulSoup(f, "html.parser")
             post_element = document.find("div", {"class": "main"}).find("article")
-            title = sub(r"\s+", " ", post_element.find("section", {"class": "post"}).text.strip())
+            description = document.find("meta", {"name": "description"})["content"]
             tags = document.find("meta", {"name": "keywords"})["content"].split(',')
+            title = description if description else ' '.join(tags)
             notes = parse_int(post_element.find("a", {"class": "post-notes"}).text)
             return TumblrPost.Snapshot(post, title, date, tags, notes)
 
