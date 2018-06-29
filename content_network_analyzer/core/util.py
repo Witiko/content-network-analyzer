@@ -3,7 +3,7 @@ Defines utility functions.
 """
 
 from logging import getLogger
-from re import match, sub
+import re
 
 
 LOGGER = getLogger(__name__)
@@ -40,7 +40,7 @@ def fraction(numerator, denominator, bottom=0.0):
 
 
 def parse_int(text):
-    """Returns the first integer in a string.
+    """Returns the first integer in a string, disregarding any whitespaces.
 
     Parameters
     ----------
@@ -52,4 +52,9 @@ def parse_int(text):
     int
         The first integer in the string.
     """
-    return int(sub(r"\s*", "", match(r"[^\d]*([\d\s]+)", text).group(1)))
+    assert isinstance(text, str)
+
+    match = re.match(r"[^\d]*([\d\s]+)", text)
+    assert match, "Can't parse \"%s\" as an integer" % text
+
+    return int(re.sub(r"\s*", "", match.group(1)))
