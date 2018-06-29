@@ -56,6 +56,45 @@ class WattPadBook(RandomVariable, NamedEntity):
     """
     _samples = WeakValueDictionary()
 
+    def __init__(self, url):
+        self.url = url
+        if url in WattPadBook._samples:
+            self.sample = WattPadBook._samples[url]
+        else:
+            self.sample = SortedSet()
+            WattPadBook._samples[url] = self.sample
+
+    def _add(self, snapshot):
+        """Associate a snapshot with the book.
+
+        Parameters
+        ----------
+        shapshot : WattPadBook.Snapshot
+            The snapshot that will be associated with the book.
+        """
+        assert isinstance(snapshot, WattPadBook.Snapshot)
+        self.sample.add(snapshot)
+
+    def getName(self):
+        return self.sample[-1].title if self.sample else "(unknown title)"
+
+    def __repr__(self):
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
+
+    def __hash__(self):
+        return hash(self.url)
+
+    def __getstate__(self):
+        return self.url
+
+    def __setstate__(self, url):
+        self.__init__(url)
+
+    def __getnewargs__(self):
+        return (self.url, )
+
     class Snapshot(SampledIndividual):
         """This class represents a WattPad book snapshot.
 
@@ -173,23 +212,39 @@ class WattPadBook(RandomVariable, NamedEntity):
                 "span", {"data-toggle": "tooltip"}, text=compile(r".* Votes")).text)
             return WattPadBook.Snapshot(book, title, date, reads, votes)
 
+
+class WattPadPage(RandomVariable, NamedEntity):
+    """This class represents a page in a WattPad book along with its associated snapshots.
+
+    Parameters
+    ----------
+    url : str
+        The URL that uniquely identifies the page in a WattPad book.
+
+    Attributes
+    ----------
+    sample : sortedcontainers.SortedSet of WattPadPage.Snapshot
+        The associated snapshots.
+    """
+    _samples = WeakValueDictionary()
+
     def __init__(self, url):
         self.url = url
-        if url in WattPadBook._samples:
-            self.sample = WattPadBook._samples[url]
+        if url in WattPadPage._samples:
+            self.sample = WattPadPage._samples[url]
         else:
             self.sample = SortedSet()
-            WattPadBook._samples[url] = self.sample
+            WattPadPage._samples[url] = self.sample
 
     def _add(self, snapshot):
-        """Associate a snapshot with the book.
+        """Associate a snapshot with the page.
 
         Parameters
         ----------
-        shapshot : WattPadBook.Snapshot
-            The snapshot that will be associated with the book.
+        shapshot : WattPadPage.Snapshot
+            The snapshot that will be associated with the page.
         """
-        assert isinstance(snapshot, WattPadBook.Snapshot)
+        assert isinstance(snapshot, WattPadPage.Snapshot)
         self.sample.add(snapshot)
 
     def getName(self):
@@ -211,22 +266,6 @@ class WattPadBook(RandomVariable, NamedEntity):
 
     def __getnewargs__(self):
         return (self.url, )
-
-
-class WattPadPage(RandomVariable, NamedEntity):
-    """This class represents a page in a WattPad book along with its associated snapshots.
-
-    Parameters
-    ----------
-    url : str
-        The URL that uniquely identifies the page in a WattPad book.
-
-    Attributes
-    ----------
-    sample : sortedcontainers.SortedSet of WattPadPage.Snapshot
-        The associated snapshots.
-    """
-    _samples = WeakValueDictionary()
 
     class Snapshot(SampledIndividual):
         """This class represents a WattPad book page snapshot.
@@ -362,45 +401,3 @@ class WattPadPage(RandomVariable, NamedEntity):
             votes = parse_int(document.find("span", {"class": "votes"}).text)
             comments = parse_int(document.find("span", {"class": "comments"}).text)
             return WattPadPage.Snapshot(page, title, subtitle, date, reads, votes, comments)
-
-    def __init__(self, url):
-        self.url = url
-        if url in WattPadPage._samples:
-            self.sample = WattPadPage._samples[url]
-        else:
-            self.sample = SortedSet()
-            WattPadPage._samples[url] = self.sample
-
-    def _add(self, snapshot):
-        """Associate a snapshot with the page.
-
-        Parameters
-        ----------
-        shapshot : WattPadPage.Snapshot
-            The snapshot that will be associated with the page.
-        """
-        assert isinstance(snapshot, WattPadPage.Snapshot)
-        self.sample.add(snapshot)
-
-    def getName(self):
-        if self.sample:
-            return "%(title)s - %(subtitle)s" % self.sample[-1].__dict__
-        else:
-            return "(unknown title)"
-
-    def __repr__(self):
-        return "%s(%s)" % (
-            self.__class__.__name__,
-            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
-
-    def __hash__(self):
-        return hash(self.url)
-
-    def __getstate__(self):
-        return self.url
-
-    def __setstate__(self, url):
-        self.__init__(url)
-
-    def __getnewargs__(self):
-        return (self.url, )

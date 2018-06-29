@@ -30,6 +30,45 @@ class SoundCloudTrack(RandomVariable, NamedEntity):
     """
     _samples = WeakValueDictionary()
 
+    def __init__(self, url):
+        self.url = url
+        if url in SoundCloudTrack._samples:
+            self.sample = SoundCloudTrack._samples[url]
+        else:
+            self.sample = SortedSet()
+            SoundCloudTrack._samples[url] = self.sample
+
+    def _add(self, snapshot):
+        """Associate a snapshot with the track.
+
+        Parameters
+        ----------
+        shapshot : SoundCloudTrack.Snapshot
+            The snapshot that will be associated with the track.
+        """
+        assert isinstance(snapshot, SoundCloudTrack.Snapshot)
+        self.sample.add(snapshot)
+
+    def getName(self):
+        return self.sample[-1].title if self.sample else "(unknown title)"
+
+    def __repr__(self):
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
+
+    def __hash__(self):
+        return hash(self.url)
+
+    def __getstate__(self):
+        return self.url
+
+    def __setstate__(self, url):
+        self.__init__(url)
+
+    def __getnewargs__(self):
+        return (self.url, )
+
     class Snapshot(SampledIndividual):
         """This class represents a SoundCloud track snapshot.
 
@@ -165,42 +204,3 @@ class SoundCloudTrack(RandomVariable, NamedEntity):
             comments = int(document.find("meta", property="soundcloud:comments_count")["content"])
             likes = int(document.find("meta", property="soundcloud:like_count")["content"])
             return SoundCloudTrack.Snapshot(track, title, date, plays, downloads, comments, likes)
-
-    def __init__(self, url):
-        self.url = url
-        if url in SoundCloudTrack._samples:
-            self.sample = SoundCloudTrack._samples[url]
-        else:
-            self.sample = SortedSet()
-            SoundCloudTrack._samples[url] = self.sample
-
-    def _add(self, snapshot):
-        """Associate a snapshot with the track.
-
-        Parameters
-        ----------
-        shapshot : SoundCloudTrack.Snapshot
-            The snapshot that will be associated with the track.
-        """
-        assert isinstance(snapshot, SoundCloudTrack.Snapshot)
-        self.sample.add(snapshot)
-
-    def getName(self):
-        return self.sample[-1].title if self.sample else "(unknown title)"
-
-    def __repr__(self):
-        return "%s(%s)" % (
-            self.__class__.__name__,
-            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
-
-    def __hash__(self):
-        return hash(self.url)
-
-    def __getstate__(self):
-        return self.url
-
-    def __setstate__(self, url):
-        self.__init__(url)
-
-    def __getnewargs__(self):
-        return (self.url, )

@@ -30,6 +30,45 @@ class YouTubeTrack(RandomVariable, NamedEntity):
     """
     _samples = WeakValueDictionary()
 
+    def __init__(self, url):
+        self.url = url
+        if url in YouTubeTrack._samples:
+            self.sample = YouTubeTrack._samples[url]
+        else:
+            self.sample = SortedSet()
+            YouTubeTrack._samples[url] = self.sample
+
+    def _add(self, snapshot):
+        """Associate a snapshot with the track.
+
+        Parameters
+        ----------
+        shapshot : YouTubeTrack.Snapshot
+            The snapshot that will be associated with the track.
+        """
+        assert isinstance(snapshot, YouTubeTrack.Snapshot)
+        self.sample.add(snapshot)
+
+    def getName(self):
+        return self.sample[-1].title if self.sample else "(unknown title)"
+
+    def __repr__(self):
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
+
+    def __hash__(self):
+        return hash(self.url)
+
+    def __getstate__(self):
+        return self.url
+
+    def __setstate__(self, url):
+        self.__init__(url)
+
+    def __getnewargs__(self):
+        return (self.url, )
+
     class Snapshot(SampledIndividual):
         """This class represents a YouTube track snapshot.
 
@@ -160,42 +199,3 @@ class YouTubeTrack(RandomVariable, NamedEntity):
             dislikes = parse_int(
                 document.find("button", {"class": "like-button-renderer-dislike-button"}).text)
             return YouTubeTrack.Snapshot(track, title, date, views, likes, dislikes)
-
-    def __init__(self, url):
-        self.url = url
-        if url in YouTubeTrack._samples:
-            self.sample = YouTubeTrack._samples[url]
-        else:
-            self.sample = SortedSet()
-            YouTubeTrack._samples[url] = self.sample
-
-    def _add(self, snapshot):
-        """Associate a snapshot with the track.
-
-        Parameters
-        ----------
-        shapshot : YouTubeTrack.Snapshot
-            The snapshot that will be associated with the track.
-        """
-        assert isinstance(snapshot, YouTubeTrack.Snapshot)
-        self.sample.add(snapshot)
-
-    def getName(self):
-        return self.sample[-1].title if self.sample else "(unknown title)"
-
-    def __repr__(self):
-        return "%s(%s)" % (
-            self.__class__.__name__,
-            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
-
-    def __hash__(self):
-        return hash(self.url)
-
-    def __getstate__(self):
-        return self.url
-
-    def __setstate__(self, url):
-        self.__init__(url)
-
-    def __getnewargs__(self):
-        return (self.url, )

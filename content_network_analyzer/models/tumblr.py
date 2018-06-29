@@ -30,6 +30,55 @@ class TumblrPost(RandomVariable, NamedEntity):
     """
     _samples = WeakValueDictionary()
 
+    def __init__(self, url):
+        self.url = url
+        if url in TumblrPost._samples:
+            self.sample = TumblrPost._samples[url]
+        else:
+            self.sample = SortedSet()
+            TumblrPost._samples[url] = self.sample
+
+    def _add(self, snapshot):
+        """Associate a snapshot with the post.
+
+        Parameters
+        ----------
+        shapshot : TumblrPost.Snapshot
+            The snapshot that will be associated with the post.
+        """
+        assert isinstance(snapshot, TumblrPost.Snapshot)
+        self.sample.add(snapshot)
+
+    def getName(self):
+        return self.sample[-1].title if self.sample else "(unknown title)"
+
+    def getTags(self):
+        """Returns the tags of the latest snapshot, or an empty set if no snapshot exists.
+
+        Returns
+        -------
+        set of str
+            The tags of the latest snapshot, or an empty set if no snapshot exists.
+        """
+        return self.sample[-1].tags if self.sample else set()
+
+    def __repr__(self):
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
+
+    def __hash__(self):
+        return hash(self.url)
+
+    def __getstate__(self):
+        return self.url
+
+    def __setstate__(self, url):
+        self.__init__(url)
+
+    def __getnewargs__(self):
+        return (self.url, )
+
     class Snapshot(SampledIndividual):
         """This class represents a Tumblr post snapshot.
 
@@ -157,52 +206,3 @@ class TumblrPost(RandomVariable, NamedEntity):
             notes = parse_int(notes_element.text) if notes_element else 0
 
             return TumblrPost.Snapshot(post, title, date, tags, notes)
-
-    def __init__(self, url):
-        self.url = url
-        if url in TumblrPost._samples:
-            self.sample = TumblrPost._samples[url]
-        else:
-            self.sample = SortedSet()
-            TumblrPost._samples[url] = self.sample
-
-    def _add(self, snapshot):
-        """Associate a snapshot with the post.
-
-        Parameters
-        ----------
-        shapshot : TumblrPost.Snapshot
-            The snapshot that will be associated with the post.
-        """
-        assert isinstance(snapshot, TumblrPost.Snapshot)
-        self.sample.add(snapshot)
-
-    def getName(self):
-        return self.sample[-1].title if self.sample else "(unknown title)"
-
-    def getTags(self):
-        """Returns the tags of the latest snapshot, or an empty set if no snapshot exists.
-
-        Returns
-        -------
-        set of str
-            The tags of the latest snapshot, or an empty set if no snapshot exists.
-        """
-        return self.sample[-1].tags if self.sample else set()
-
-    def __repr__(self):
-        return "%s(%s)" % (
-            self.__class__.__name__,
-            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
-
-    def __hash__(self):
-        return hash(self.url)
-
-    def __getstate__(self):
-        return self.url
-
-    def __setstate__(self, url):
-        self.__init__(url)
-
-    def __getnewargs__(self):
-        return (self.url, )
