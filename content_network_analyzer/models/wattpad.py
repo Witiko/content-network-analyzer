@@ -76,7 +76,10 @@ class WattPadBook(RandomVariable, NamedEntity):
         self.sample.add(snapshot)
 
     def getName(self):
-        return self.sample[-1].title if self.sample else "(unknown title)"
+        if self.sample:
+            return self.sample[-1].title
+        else:
+            return "(unknown title)"
 
     def __repr__(self):
         return "%s(%s)" % (

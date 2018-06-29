@@ -50,7 +50,10 @@ class TumblrPost(RandomVariable, NamedEntity):
         self.sample.add(snapshot)
 
     def getName(self):
-        return self.sample[-1].title if self.sample else "(unknown title)"
+        if self.sample:
+            return self.sample[-1].title
+        else:
+            return "(unknown title)"
 
     def getTags(self):
         """Returns the tags of the latest snapshot, or an empty set if no snapshot exists.
@@ -60,7 +63,10 @@ class TumblrPost(RandomVariable, NamedEntity):
         set of str
             The tags of the latest snapshot, or an empty set if no snapshot exists.
         """
-        return self.sample[-1].tags if self.sample else set()
+        if self.sample:
+            return self.sample[-1].tags
+        else:
+            return set()
 
     def __repr__(self):
         return "%s(%s)" % (
