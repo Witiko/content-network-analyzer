@@ -115,7 +115,10 @@ class SoundCloudTrack(RandomVariable, NamedEntity):
         """
         def __init__(self, track, title, date, plays, downloads, comments, likes):
             assert isinstance(track, SoundCloudTrack) or track is None
-            assert isinstance(title, str) or (title is None and track is None)
+            if title is None:
+                assert track is None
+            else:
+                assert isinstance(title, str)
             assert isinstance(date, datetime)
             assert isinstance(plays, int)
             assert isinstance(downloads, int)

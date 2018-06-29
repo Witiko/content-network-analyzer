@@ -114,7 +114,10 @@ class YouTubeTrack(RandomVariable, NamedEntity):
         """
         def __init__(self, track, title, date, views, likes, dislikes):
             assert isinstance(track, YouTubeTrack) or track is None
-            assert isinstance(title, str) or (title is None and track is None)
+            if title is None:
+                assert track is None
+            else:
+                assert isinstance(title, str)
             assert isinstance(date, datetime)
             assert isinstance(views, int)
             assert isinstance(likes, int)

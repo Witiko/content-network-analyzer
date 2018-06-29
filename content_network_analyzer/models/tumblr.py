@@ -113,7 +113,10 @@ class TumblrPost(RandomVariable, NamedEntity):
         """
         def __init__(self, post, title, date, tags, notes):
             assert isinstance(post, TumblrPost) or post is None
-            assert isinstance(title, str) or (title is None and post is None)
+            if title is None:
+                assert post is None
+            else:
+                assert isinstance(title, str)
             assert isinstance(date, datetime)
             assert isinstance(notes, int)
 
