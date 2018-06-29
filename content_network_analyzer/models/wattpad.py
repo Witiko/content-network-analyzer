@@ -16,7 +16,7 @@ from ..core import SampledIndividual, RandomVariable, NamedEntity, fraction
 LOGGER = getLogger(__name__)
 
 
-def parse_int(text):
+def parse_human_readable_int(text):
     """Translates a human-readable string (e.g. "4.1K Reads") into an integer (e.g. 4100).
 
     Parameters
@@ -206,9 +206,9 @@ class WattPadBook(RandomVariable, NamedEntity):
             """
             document = BeautifulSoup(f, "html.parser")
             title = document.find("h1").text.strip()
-            reads = parse_int(document.find(
+            reads = parse_human_readable_int(document.find(
                 "span", {"data-toggle": "tooltip"}, text=compile(r".* Reads")).text)
-            votes = parse_int(document.find(
+            votes = parse_human_readable_int(document.find(
                 "span", {"data-toggle": "tooltip"}, text=compile(r".* Votes")).text)
             return WattPadBook.Snapshot(book, title, date, reads, votes)
 
@@ -397,7 +397,7 @@ class WattPadPage(RandomVariable, NamedEntity):
             document = BeautifulSoup(f, "html.parser")
             title = document.find("h1").text.strip()
             subtitle = document.find("h2").text.strip()
-            reads = parse_int(document.find("span", {"class": "reads"}).text)
-            votes = parse_int(document.find("span", {"class": "votes"}).text)
-            comments = parse_int(document.find("span", {"class": "comments"}).text)
+            reads = parse_human_readable_int(document.find("span", {"class": "reads"}).text)
+            votes = parse_human_readable_int(document.find("span", {"class": "votes"}).text)
+            comments = parse_human_readable_int(document.find("span", {"class": "comments"}).text)
             return WattPadPage.Snapshot(page, title, subtitle, date, reads, votes, comments)
