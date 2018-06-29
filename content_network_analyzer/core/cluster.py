@@ -91,14 +91,25 @@ class LazyUnion(Cluster):
         individuals = [None, None]
         first = ((individual, 0, 1) for individual in self.first)
         second = ((individual, 1, 0) for individual in self.second)
+        previous_yield = None
+        future_yield = None
         for first_individual, first_individual_index, second_individual_index \
                 in merge(first, second):
             second_individual = individuals[second_individual_index]
             if second_individual is not None:
-                yield first_individual + second_individual
+                current_yield = first_individual + second_individual
             else:
-                yield first_individual
+                current_yield = first_individual
             individuals[first_individual_index] = first_individual
+
+            if previous_yield is None:  # Squash together equivalent individuals.
+                previous_yield = current_yield
+            if current_yield > previous_yield:
+                previous_yield = current_yield
+                yield future_yield
+            future_yield = current_yield
+        if future_yield:
+            yield future_yield
 
     def __repr__(self):
         return "%s(%s, %s)" % (self.__class__.__name__, self.first, self.second)

@@ -35,6 +35,9 @@ class Individual(object):
         """
         pass
 
+    def __radd__(self, other):
+        return self.__add__(other)
+
     def __repr__(self):
         return "%s" % (self.__class__)
 
@@ -62,3 +65,9 @@ class SampledIndividual(Individual):
         """Returns the datetime at which the individual was sampled.
         """
         return self._date
+
+    def __lt__(self, other):
+        return isinstance(other, SampledIndividual) and self.getDatetime() < other.getDatetime()
+
+    def __le__(self, other):
+        return isinstance(other, SampledIndividual) and self.getDatetime() <= other.getDatetime()

@@ -32,14 +32,21 @@ class MatPlotLibView(View):
 
     Parameters
     ----------
-    clusters: iterable of Cluster and NamedEntity
-        An iterable of named clusters to view.
+    clusters : iterable of Cluster and NamedEntity
+        The named clusters to view.
+
+    Attributes
+    ----------
+    clusters : sequence of Cluster and NamedEntity
+        The named clusters to view.
     """
     def __init__(self, clusters):
-        self._clusters = list(clusters)
-        for cluster in self._clusters:
+        cluster_list = list(clusters)
+        for cluster in cluster_list:
             assert isinstance(cluster, Cluster)
             assert isinstance(cluster, NamedEntity)
+
+        self.clusters = cluster_list
 
     def display(self, fig, ax, attr, mindate=DATETIME_MIN, maxdate=DATETIME_MAX):
         """Displays an iterable of clusters in a given datetime range.
@@ -64,12 +71,13 @@ class MatPlotLibView(View):
 
         lineformats = cycle(product(LINES, [(r/255., g/255., b/255.) for (r, g, b) in COLORS]))
         latest_values = {}
-        for cluster in self._clusters:
+        for cluster in self.clusters:
             individuals = [
                 individual for individual in cluster
                 if individual.getDatetime() >= mindate and individual.getDatetime() <= maxdate]
-            dates = [individual.getDatetime() for individual in individuals]
-            values = [individual.__dict__[attr] for individual in individuals]
+            dates, values = list(zip(*(
+                (individual.getDatetime(), individual.__dict__[attr])
+                for individual in individuals if attr in individual.__dict__))) or ([],[])
             if not values:
                 continue
             cluster_name = cluster.getName()
