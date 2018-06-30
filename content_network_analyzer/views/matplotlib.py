@@ -77,7 +77,7 @@ class MatPlotLibView(View):
                 if individual.getDatetime() >= mindate and individual.getDatetime() <= maxdate]
             dates, values = list(zip(*(
                 (individual.getDatetime(), individual.__dict__[attr])
-                for individual in individuals if attr in individual.__dict__))) or ([],[])
+                for individual in individuals if attr in individual.__dict__))) or ([], [])
             if not values:
                 continue
             cluster_name = cluster.getName()
