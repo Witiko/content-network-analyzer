@@ -140,12 +140,6 @@ class SoundCloudTrack(RandomVariable, NamedEntity):
         def getDatetime(self):
             return self.date
 
-        def __lt__(self, other):
-            return isinstance(other, SoundCloudTrack.Snapshot) and self.date < other.date
-
-        def __le__(self, other):
-            return isinstance(other, SoundCloudTrack.Snapshot) and self.date <= other.date
-
         def __hash__(self):
             return hash((self.track, self.date))
 
