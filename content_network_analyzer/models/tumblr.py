@@ -145,7 +145,7 @@ class TumblrPost(RandomVariable, NamedEntity):
         def __add__(self, other):
             assert isinstance(other, TumblrPost.Snapshot) or other == 0
             return self if other == 0 else TumblrPost.Snapshot(
-                post=None, title=None, date=self.date, tags=self.tags & other.tags,
+                post=None, title=None, date=max(self.date, other.date), tags=self.tags & other.tags,
                 notes=self.notes + other.notes)
 
         def __getstate__(self):

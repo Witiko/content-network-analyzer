@@ -153,8 +153,8 @@ class SoundCloudTrack(RandomVariable, NamedEntity):
         def __add__(self, other):
             assert isinstance(other, SoundCloudTrack.Snapshot) or other == 0
             return self if other == 0 else SoundCloudTrack.Snapshot(
-                track=None, title=None, date=self.date, plays=self.plays + other.plays,
-                downloads=self.downloads + other.downloads,
+                track=None, title=None, date=max(self.date, other.date),
+                plays=self.plays + other.plays, downloads=self.downloads + other.downloads,
                 comments=self.comments + other.comments, likes=self.likes + other.likes)
 
         def __getstate__(self):
