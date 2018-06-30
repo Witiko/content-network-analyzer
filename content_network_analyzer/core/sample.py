@@ -23,6 +23,12 @@ class Individual(object):
     def __add__(self, other):
         """Returns the aggregate of two individuals.
 
+        Note
+        ----
+        The individual is a monoid with the neutral element 0. Therefore, __add__(self, 0)
+        must return self. This makes it possible to invoke the built-in sum function on
+        iterators of individuals.
+
         Parameters
         ----------
         other : cluster

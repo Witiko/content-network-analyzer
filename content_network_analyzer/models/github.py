@@ -584,8 +584,8 @@ class GitHubRepository(RandomVariable, NamedEntity):
             return "%s(%s)" % (self.__class__.__name__, self.__dict__)
 
         def __add__(self, other):
-            assert isinstance(other, GitHubRepository.Snapshot)
-            return GitHubRepository.Snapshot(
+            assert isinstance(other, GitHubRepository.Snapshot) or other == 0
+            return self if other == 0 else GitHubRepository.Snapshot(
                 repository=None, owner=None, title=None, date=self.date,
                 watching=self.watching + other.watching, stars=self.stars + other.stars,
                 forks=self.forks + other.forks, issues=self.issues + other.issues,

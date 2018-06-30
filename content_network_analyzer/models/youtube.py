@@ -155,8 +155,8 @@ class YouTubeTrack(RandomVariable, NamedEntity):
             return "%s(%s)" % (self.__class__.__name__, self.__dict__)
 
         def __add__(self, other):
-            assert isinstance(other, YouTubeTrack.Snapshot)
-            return YouTubeTrack.Snapshot(
+            assert isinstance(other, YouTubeTrack.Snapshot) or other == 0
+            return self if other == 0 else YouTubeTrack.Snapshot(
                 track=None, title=None, date=self.date, views=self.views + other.views,
                 likes=self.likes + other.likes, dislikes=self.dislikes + other.dislikes)
 

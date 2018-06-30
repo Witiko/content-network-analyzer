@@ -166,8 +166,8 @@ class WattPadBook(RandomVariable, NamedEntity):
             return "%s(%s)" % (self.__class__.__name__, self.__dict__)
 
         def __add__(self, other):
-            assert isinstance(other, WattPadBook.Snapshot)
-            return WattPadBook.Snapshot(
+            assert isinstance(other, WattPadBook.Snapshot) or other == 0
+            return self if other == 0 else WattPadBook.Snapshot(
                 book=None, title=None, date=self.date, reads=self.reads + other.reads,
                 votes=self.votes + other.votes)
 
