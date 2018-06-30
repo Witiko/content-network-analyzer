@@ -427,6 +427,19 @@ class GitHubRepository(RandomVariable, NamedEntity):
         else:
             return self.owner
 
+    def getTitle(self):
+        """Returns the title of the repository.
+
+        Returns
+        -------
+        str
+            The title of the repository.
+        """
+        if self.sample:
+            return self.sample[-1].title
+        else:
+            return self.title
+
     def getTags(self):
         """Returns the tags of the latest snapshot, or an empty set if no snapshot exists.
 
