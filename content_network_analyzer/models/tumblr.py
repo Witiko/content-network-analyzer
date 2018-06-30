@@ -196,14 +196,13 @@ class TumblrPost(RandomVariable, NamedEntity):
 
             description = description_element["content"]
 
-            tags_element = document.find("meta", {"name": "keywords"})
-            assert tags_element, "Tags not found"
-
-            tags = tags_element["content"].split(',')
-            title = description if description else ' '.join(tags)
-
             post_element = document.find("div", {"class": "main"}).find("article")
             assert post_element, "Post element not found"
+
+            tag_elements = post_element.find_all("a", {"class": "tag-link"})
+            tags = [tag_element.text for tag_element in tag_elements]
+
+            title = description if description else ' '.join(tags)
 
             notes_element = post_element.find("a", {"class": "post-notes"})
             notes = parse_int(notes_element.text) if notes_element else 0
