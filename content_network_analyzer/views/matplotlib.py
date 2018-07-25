@@ -101,5 +101,4 @@ class MatPlotLibView(View):
             [label for _, label in sorted_handles],
             loc="upper left", bbox_to_anchor=(1, 1))
 
-        fig.tight_layout()
         fig.autofmt_xdate()
