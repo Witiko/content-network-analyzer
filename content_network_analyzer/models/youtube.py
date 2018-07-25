@@ -3,6 +3,7 @@ Defines datatypes for YouTube tracks.
 """
 
 from datetime import datetime
+import json
 from logging import getLogger
 from weakref import WeakValueDictionary
 
@@ -199,4 +200,35 @@ class YouTubeTrack(RandomVariable, NamedEntity):
                 document.find("button", {"class": "like-button-renderer-like-button"}).text)
             dislikes = parse_int(
                 document.find("button", {"class": "like-button-renderer-dislike-button"}).text)
+            return YouTubeTrack.Snapshot(track, title, date, views, likes, dislikes)
+
+        @staticmethod
+        def from_apiv3(track, date, f):
+            """Constructs a YouTube track snapshot from a JSON API v3 dump.
+
+            Parameters
+            ----------
+            track : YouTubeTrack or None
+                The YouTube track the snapshot belongs to.
+            date : datetime
+                The date, and time at which the dump was taken.
+            f : file-like readable object
+                The JSON API v3 dump.
+
+            Returns
+            -------
+            YouTubeTrack.Snapshot
+                The snapshot constructed from the JSON API v3 dump.
+            """
+            document = json.load(f)
+            items = [item for item in document["items"] if item["kind"] == "youtube#video"]
+            assert items
+            item = items[0]
+            assert "snippet" in item
+            assert "statistics" in item
+
+            title = item["snippet"]["title"]
+            views = int(item["statistics"]["viewCount"])
+            likes = int(item["statistics"]["likeCount"])
+            dislikes = int(item["statistics"]["dislikeCount"])
             return YouTubeTrack.Snapshot(track, title, date, views, likes, dislikes)
