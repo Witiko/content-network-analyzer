@@ -21,8 +21,8 @@ class YouTubeTrack(RandomVariable, NamedEntity):
 
     Parameters
     ----------
-    url : str
-        The URL that uniquely identifies the YouTube track.
+    id : str
+        The ID that uniquely identifies the YouTube track.
 
     Attributes
     ----------
@@ -31,13 +31,13 @@ class YouTubeTrack(RandomVariable, NamedEntity):
     """
     _samples = WeakValueDictionary()
 
-    def __init__(self, url):
-        self.url = url
-        if url in YouTubeTrack._samples:
-            self.sample = YouTubeTrack._samples[url]
+    def __init__(self, id):
+        self.id = id
+        if id in YouTubeTrack._samples:
+            self.sample = YouTubeTrack._samples[id]
         else:
             self.sample = SortedSet()
-            YouTubeTrack._samples[url] = self.sample
+            YouTubeTrack._samples[id] = self.sample
 
     def _add(self, snapshot):
         """Associate a snapshot with the track.
@@ -59,19 +59,19 @@ class YouTubeTrack(RandomVariable, NamedEntity):
     def __repr__(self):
         return "%s(%s)" % (
             self.__class__.__name__,
-            ("%s \"%s\"" % (self.url, self.getName())) if self.sample else self.url)
+            ("%s \"%s\"" % (self.id, self.getName())) if self.sample else self.id)
 
     def __hash__(self):
-        return hash(self.url)
+        return hash(self.id)
 
     def __getstate__(self):
-        return self.url
+        return self.id
 
-    def __setstate__(self, url):
-        self.__init__(url)
+    def __setstate__(self, id):
+        self.__init__(id)
 
     def __getnewargs__(self):
-        return (self.url, )
+        return (self.id, )
 
     class Snapshot(SampledIndividual):
         """This class represents a YouTube track snapshot.
